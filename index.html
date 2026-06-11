@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EZOON BANGLA TV - Live Streaming</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #006a4e;
+            --accent-red: #f42a41;
+            --bg-dark: #0f0f0f;
+            --card-bg: #1c1c1c;
+            --text-white: #ffffff;
+            --text-grey: #aaaaaa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'SolaimanLipi', 'Noto Sans Bengali', -apple-system, sans-serif;
+        }
+
+        html, body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+        }
+
+        /* App Header */
+        header {
+            background-color: var(--primary-green);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+            flex-shrink: 0;
+            min-height: 48px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .flag-icon {
+            width: 28px;
+            height: 18px;
+            background: radial-gradient(circle at 45% 50%, var(--accent-red) 35%, var(--primary-green) 36%);
+            border-radius: 3px;
+            border: 1px dashed rgba(255,255,255,0.4);
+            flex-shrink: 0;
+        }
+
+        header h1 {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            font-weight: bold;
+            color: var(--text-white);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HOME PAGE */
+        #home-page {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Search */
+        .search-area {
+            padding: 12px 16px 8px 16px;
+            background-color: #121212;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: #2b2b2b;
+            border: 1px solid #444;
+            border-radius: 20px;
+            padding: 10px 16px;
+            color: white;
+            outline: none;
+            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border: 2px solid var(--primary-green) !important;
+            box-shadow: 0 0 10px rgba(0, 106, 78, 0.5) !important;
+        }
+
+        /* Category Pills */
+        .category-container {
+            display: flex;
+            gap: 8px;
+            padding: 4px 16px 12px 16px;
+            background-color: #121212;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-bottom: 1px solid #222;
+            scrollbar-width: none;
+            flex-shrink: 0;
+        }
+
+        .category-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-pill {
+            background-color: #2b2b2b;
+            color: var(--text-white);
+            border: 1px solid #444;
+            padding: 6px 14px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: clamp(0.75rem, 2vw, 0.85rem);
+            font-weight: bold;
+            transition: 0.2s;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .category-pill.active {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+        }
+
+        .category-pill:focus {
+            background-color: var(--accent-red);
+            border-color: var(--text-white);
+            outline: none;
+        }
+
+        /* Grid */
+        .grid-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 10px;
+        }
+
+        @media (min-width: 480px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .grid-container {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+
+        .channel-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            border: 1px solid #2c2c2c;
+            transition: transform 0.2s, border-color 0.2s;
+            aspect-ratio: 3 / 4;
+        }
+
+        .channel-card:hover {
+            transform: scale(1.03);
+            border-color: var(--primary-green);
+        }
+
+        .logo-box {
+            flex: 1;
+            width: 100%;
+            height: 75%;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .channel-name {
+            height: 25%;
+            padding: 4px 6px;
+            font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+            text-align: center;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #222;
+            color: var(--text-white);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* PLAYER PAGE - Full Screen Overlay */
+        #player-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        #player-page.active {
+            display: flex;
+        }
+
+        /* Player Top Bar */
+        .player-top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .player-top-bar > * {
+            pointer-events: auto;
+        }
+
+        .back-btn {
+            background-color: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .back-btn:hover, .back-btn:focus {
+            background-color: var(--primary-green);
+            outline: none;
+        }
+
+        .back-btn .material-icons {
+            font-size: 20px;
+        }
+
+        .live-badge-player {
+            background-color: var(--accent-red);
+            color: white;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .live-badge-player::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: pulse 1s infinite alternate;
+        }
+
+        /* Video Container */
+        .video-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            position: relative;
+        }
+
+        video, iframe {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border: none;
+        }
+
+        /* Player Bottom Controls */
+        .player-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .player-bottom-bar > * {
+            pointer-events: auto;
+        }
+
+        .channel-info-player {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .channel-title-player {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .player-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-btn {
+            background-color: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .control-btn:hover, .control-btn:focus {
+            background-color: var(--primary-green);
+            outline: none;
+        }
+
+        .control-btn .material-icons {
+            font-size: 22px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.2); opacity: 1; }
+        }
+        .server-badge {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background-color: var(--accent-red);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        .logo-box {
+            position: relative;
+        }
+
+        /* Server Buttons in Player */
+        .server-buttons-container {
+            display: none;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .server-btn {
+            background-color: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .server-btn:hover, .server-btn:focus {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+            outline: none;
+            transform: scale(1.05);
+        }
+
+        .server-btn.active {
+            background-color: var(--accent-red);
+            border-color: var(--accent-red);
+            box-shadow: 0 0 10px rgba(244, 42, 65, 0.5);
+        }
+    
+        /* FIFA WORLD CUP SECTION */
+        .fifa-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--accent-red);
+            flex-shrink: 0;
+        }
+
+        .fifa-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffd700;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .fifa-header .material-icons {
+            font-size: 24px;
+            color: #ffd700;
+        }
+
+        .fifa-grid {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-red) #2b2b2b;
+        }
+
+        .fifa-grid::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .fifa-grid::-webkit-scrollbar-track {
+            background: #2b2b2b;
+            border-radius: 2px;
+        }
+
+        .fifa-grid::-webkit-scrollbar-thumb {
+            background: var(--accent-red);
+            border-radius: 2px;
+        }
+
+        .fifa-card {
+            flex: 0 0 auto;
+            width: 100px;
+            background: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid #444;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .fifa-card:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .fifa-card .fifa-badge {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            font-size: 0.55rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 2;
+            text-transform: uppercase;
+        }
+
+        .fifa-card .logo-box {
+            height: 70px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .fifa-card .logo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .fifa-card .channel-name {
+            padding: 5px;
+            font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+            text-align: center;
+            font-weight: bold;
+            color: #ffd700;
+            background: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (min-width: 480px) {
+            .fifa-card {
+                width: 110px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .fifa-card {
+                width: 120px;
+            }
+        }
+
+        /* TV Remote Focus Styles - Enhanced & Strict Hierarchy */
+        *:focus, .focused {
+            outline: none;
+        }
+
+        .channel-card:focus, .channel-card.focused {
+            border: 3px solid var(--accent-red) !important;
+            transform: scale(1.08) !important;
+            box-shadow: 0 0 20px rgba(244, 42, 65, 0.7) !important;
+            z-index: 10;
+        }
+
+        .fifa-card:focus, .fifa-card.focused {
+            border: 3px solid #ffd700 !important;
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.7) !important;
+            transform: scale(1.08) !important;
+            z-index: 10;
+        }
+
+        .category-pill:focus, .category-pill.focused {
+            background-color: var(--accent-red) !important;
+            border-color: #fff !important;
+            outline: 2px solid #fff !important;
+            outline-offset: 2px !important;
+            transform: scale(1.05) !important;
+        }
+
+        .server-btn:focus, .server-btn.focused {
+            background-color: var(--primary-green) !important;
+            border-color: #fff !important;
+            outline: 2px solid #fff !important;
+            outline-offset: 2px !important;
+            transform: scale(1.08) !important;
+        }
+
+        .control-btn:focus, .control-btn.focused {
+            background-color: var(--primary-green) !important;
+            border-color: #fff !important;
+            outline: 2px solid #fff !important;
+            outline-offset: 2px !important;
+            transform: scale(1.1) !important;
+        }
+
+        .back-btn:focus, .back-btn.focused {
+            background-color: var(--primary-green) !important;
+            border-color: #fff !important;
+            outline: 2px solid #fff !important;
+            outline-offset: 2px !important;
+        }
+
+        /* Added Styles for Transition & Dynamic Hidden State on TV Controls */
+        .player-top-bar, .player-bottom-bar {
+            transition: opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.3s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .player-top-bar.controls-hidden, .player-bottom-bar.controls-hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Click animation for TV remote OK button */
+        .channel-card.clicked,
+        .fifa-card.clicked,
+        .category-pill.clicked,
+        .server-btn.clicked,
+        .control-btn.clicked,
+        .back-btn.clicked {
+            animation: tvClick 0.2s ease;
+        }
+
+        @keyframes tvClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.92); }
+            100% { transform: scale(1); }
+        }
+
+        /* Smooth scroll behavior for TV navigation */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar but keep functionality for TV */
+        .grid-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+        .grid-wrapper {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+</style>
+</head>
+<body>
+
+    <!-- App Header -->
+    <header>
+        <div class="logo-section">
+            <div class="flag-icon"></div>
+            <h1>EZOON BANGLA TV</h1>
+        </div>
+        <div class="live-badge">লাইভ</div>
+    </header>
+
+    <div class="main-content">
+        <!-- HOME PAGE: Channel Grid -->
+        <div id="home-page">
+            <div class="search-area">
+                <input type="text" id="search-input" class="search-input" placeholder="চ্যানেলের নাম দিয়ে খুঁজুন..." oninput="applyFilters()">
+            </div>
+            <!-- FIFA WORLD CUP TOP LIST -->
+            <div class="fifa-section" id="fifa-section">
+                <div class="fifa-header">
+                    <span class="material-icons">emoji_events</span>
+                    <span>FIFA WORLD CUP 2026</span>
+                </div>
+                <div class="fifa-grid" id="fifa-grid"></div>
+            </div>
+
+
+            <div class="category-container" id="category-bar">
+                <div class="category-pill active" tabindex="0" onclick="selectCategory('All', this)">সব (All)</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Bangladesh', this)">বাংলাদেশ</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('News', this)">সংবাদ (News)</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Sports', this)">খেলাধুলা</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Kolkata', this)">কলকাতা</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Cartoon', this)">কার্টুন</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('India', this)">ইন্ডিয়া</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Islamic', this)">ইসলামিক</div>
+                <div class="category-pill" tabindex="0" onclick="selectCategory('Others', this)">অন্যান্য</div>
+            </div>
+
+            <div class="grid-wrapper">
+                <div class="grid-container" id="channels-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLAYER PAGE: Full Screen Overlay -->
+    <div id="player-page">
+        <!-- Top Bar -->
+        <div class="player-top-bar" id="player-top-bar">
+            <button class="back-btn" id="back-btn" onclick="goBack()">
+                <span class="material-icons">arrow_back</span>
+                ব্যাক
+            </button>
+            <div class="live-badge-player">লাইভ</div>
+        </div>
+
+        <!-- Video Area -->
+        <div class="video-container">
+            <video id="tv-player" controls autoplay playsinline></video>
+            <iframe id="embed-player" style="display:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="player-bottom-bar" id="player-bottom-bar">
+            <div class="channel-info-player">
+                <div class="channel-title-player" id="current-title">প্লেলিস্ট লোড হচ্ছে...</div>
+                <div class="player-controls">
+                    <button class="control-btn" id="pip-btn" onclick="triggerPip()" title="পপআপ মোড">
+                        <span class="material-icons">picture_in_picture_alt</span>
+                    </button>
+                </div>
+            </div>
+            <div class="server-buttons-container" id="server-buttons"></div>
+        </div>
+    </div>
+
+    <script>
+// ============================================================
+// EZOON BANGLA TV - REFACTORED COMPACT INDEX-BASED TV REMOTE ENGINE
+// ============================================================
+
+// High-performance DOM caching
+const DOM = {
+    videoElement: document.getElementById('tv-player'),
+    embedElement: document.getElementById('embed-player'),
+    homePage: document.getElementById('home-page'),
+    playerPage: document.getElementById('player-page'),
+    header: document.querySelector('header'),
+    searchInput: document.getElementById('search-input'),
+    fifaGrid: document.getElementById('fifa-grid'),
+    fifaSection: document.getElementById('fifa-section'),
+    categoryBar: document.getElementById('category-bar'),
+    channelsGrid: document.getElementById('channels-grid'),
+    currentTitle: document.getElementById('current-title'),
+    pipBtn: document.getElementById('pip-btn'),
+    serverButtons: document.getElementById('server-buttons'),
+    backBtn: document.getElementById('back-btn'),
+    playerTopBar: document.getElementById('player-top-bar'),
+    playerBottomBar: document.getElementById('player-bottom-bar')
+};
+
+let hlsInstance = null;
+let channelsList = [];
+let activeCategory = 'All';
+let currentChannelIndex = -1;
+let currentServerIndex = 0;
+let lastFocusedElement = null;
+
+// ============================================================
+// TV INDEX-BASED NAVIGATION ENGINE (Replaces spatial navigation)
+// ============================================================
+const NAV_ZONES = {
+    SEARCH: 0,
+    FIFA: 1,
+    CATEGORIES: 2,
+    GRID: 3,
+    PLAYER: 4
+};
+
+let activeZone = NAV_ZONES.GRID;
+let zoneIndexes = {
+    [NAV_ZONES.SEARCH]: 0,
+    [NAV_ZONES.FIFA]: 0,
+    [NAV_ZONES.CATEGORIES]: 0,
+    [NAV_ZONES.GRID]: 0,
+    [NAV_ZONES.PLAYER]: 0
+};
+
+// Input control and throttling to prevent key bounce on older TV platforms
+let lastKeyPressTime = 0;
+const KEY_THROTTLE_MS = 200;
+
+// Netflix/YouTube style controls autohide state
+let controlsTimeout = null;
+let controlsVisible = true;
+
+window.onload = function() {
+    ensureTabIndex();
+    loadM3U();
+    setupDpadNavigation();
+    setupBackButton();
+    setupFocusManagement();
+    setupActivityTracking();
+};
+
+function ensureTabIndex() {
+    const selectors = [
+        '.channel-card',
+        '.fifa-card',
+        '.category-pill',
+        '.server-btn',
+        '.control-btn',
+        '.back-btn',
+        '#search-input',
+        '#pip-btn'
+    ];
+
+    selectors.forEach(function(selector) {
+        document.querySelectorAll(selector).forEach(function(el) {
+            if (!el.hasAttribute('tabindex')) {
+                el.setAttribute('tabindex', '0');
+            }
+        });
+    });
+}
+
+function refreshTabIndex() {
+    ensureTabIndex();
+}
+
+// Focus Management Sync Module
+function setupFocusManagement() {
+    document.addEventListener('focusin', function(e) {
+        const target = e.target;
+        if (!target) return;
+
+        // Auto synchronizes navigation indexes when a hover or keyboard tab event happens
+        if (target === DOM.searchInput) {
+            activeZone = NAV_ZONES.SEARCH;
+            zoneIndexes[NAV_ZONES.SEARCH] = 0;
+        } else if (target.classList.contains('fifa-card')) {
+            activeZone = NAV_ZONES.FIFA;
+            const els = getZoneElements(NAV_ZONES.FIFA);
+            const idx = els.indexOf(target);
+            if (idx !== -1) zoneIndexes[NAV_ZONES.FIFA] = idx;
+        } else if (target.classList.contains('category-pill')) {
+            activeZone = NAV_ZONES.CATEGORIES;
+            const els = getZoneElements(NAV_ZONES.CATEGORIES);
+            const idx = els.indexOf(target);
+            if (idx !== -1) zoneIndexes[NAV_ZONES.CATEGORIES] = idx;
+        } else if (target.classList.contains('channel-card')) {
+            activeZone = NAV_ZONES.GRID;
+            const els = getZoneElements(NAV_ZONES.GRID);
+            const idx = els.indexOf(target);
+            if (idx !== -1) zoneIndexes[NAV_ZONES.GRID] = idx;
+        } else if (DOM.playerPage.classList.contains('active')) {
+            activeZone = NAV_ZONES.PLAYER;
+            const els = getPlayerFocusables();
+            const idx = els.indexOf(target);
+            if (idx !== -1) zoneIndexes[NAV_ZONES.PLAYER] = idx;
+        }
+
+        if (target.classList.contains('channel-card') ||
+            target.classList.contains('fifa-card') ||
+            target.classList.contains('category-pill') ||
+            target.classList.contains('server-btn') ||
+            target.classList.contains('control-btn') ||
+            target.classList.contains('back-btn')) {
+            lastFocusedElement = target;
+        }
+    });
+
+    document.addEventListener('focusout', function() {
+        setTimeout(function() {
+            const active = document.activeElement;
+            if (!active || active === document.body) {
+                restoreFocus();
+            }
+        }, 10);
+    });
+}
+
+function restoreFocus() {
+    if (lastFocusedElement && document.contains(lastFocusedElement)) {
+        lastFocusedElement.focus();
+    } else {
+        const firstFocusable = getFirstFocusable();
+        if (firstFocusable) {
+            firstFocusable.focus();
+        }
+    }
+}
+
+function getFirstFocusable() {
+    if (DOM.playerPage.classList.contains('active')) {
+        return DOM.backBtn || document.querySelector('.control-btn');
+    } else {
+        const visibleCards = Array.from(document.querySelectorAll('.channel-card, .fifa-card'))
+            .filter(function(c) { return c.style.display !== 'none'; });
+        if (visibleCards.length > 0) return visibleCards[0];
+        return DOM.searchInput;
+    }
+}
+
+// TV Activity HUD Monitoring (Reset autohide timers on user actions)
+function setupActivityTracking() {
+    const activityEvents = ['touchstart', 'touchend', 'mousemove', 'click'];
+    activityEvents.forEach(evt => {
+        document.addEventListener(evt, function() {
+            if (DOM.playerPage.classList.contains('active')) {
+                showPlayerControls();
+            }
+        });
+    });
+}
+
+// Helper to determine focus zones on home screen
+function getZoneElements(zone) {
+    switch(zone) {
+        case NAV_ZONES.SEARCH:
+            return [DOM.searchInput];
+        case NAV_ZONES.FIFA:
+            return Array.from(document.querySelectorAll('#fifa-grid .fifa-card')).filter(el => el.style.display !== 'none');
+        case NAV_ZONES.CATEGORIES:
+            return Array.from(document.querySelectorAll('#category-bar .category-pill')).filter(el => el.style.display !== 'none');
+        case NAV_ZONES.GRID:
+            return Array.from(document.querySelectorAll('#channels-grid .channel-card')).filter(el => el.style.display !== 'none');
+        case NAV_ZONES.PLAYER:
+            return getPlayerFocusables();
+        default:
+            return [];
+    }
+}
+
+function getPlayerFocusables() {
+    const list = [];
+    if (DOM.backBtn && DOM.backBtn.offsetParent !== null) list.push(DOM.backBtn);
+    if (DOM.pipBtn && DOM.pipBtn.offsetParent !== null && DOM.pipBtn.style.display !== 'none') list.push(DOM.pipBtn);
+    document.querySelectorAll('#server-buttons .server-btn').forEach(btn => {
+        if (btn.offsetParent !== null) list.push(btn);
+    });
+    return list;
+}
+
+// ============================================================
+// ARROW CONTROL ROUTING ENGINE (Pure Dynamic Column Index-Based)
+// ============================================================
+function moveFocus(direction) {
+    // Player HUD Navigation Rules
+    if (DOM.playerPage.classList.contains('active')) {
+        activeZone = NAV_ZONES.PLAYER;
+        const els = getPlayerFocusables();
+        if (els.length === 0) return;
+
+        let idx = els.indexOf(document.activeElement);
+        if (idx === -1) idx = zoneIndexes[NAV_ZONES.PLAYER] || 0;
+
+        if (direction === 'left') {
+            idx = (idx - 1 + els.length) % els.length;
+        } else if (direction === 'right') {
+            idx = (idx + 1) % els.length;
+        } else if (direction === 'up') {
+            // Jump from bottom (PiP/Servers) back up to Back Button
+            if (idx > 0) idx = 0;
+        } else if (direction === 'down') {
+            // Jump from top Back Button down to primary bottom items
+            if (idx === 0 && els.length > 1) idx = 1;
+        }
+
+        zoneIndexes[NAV_ZONES.PLAYER] = idx;
+        const target = els[idx];
+        if (target) {
+            target.focus();
+            lastFocusedElement = target;
+        }
+        return;
+    }
+
+    // Home Screen Navigation Rules
+    let els = getZoneElements(activeZone);
+    let idx = zoneIndexes[activeZone];
+
+    if (activeZone === NAV_ZONES.SEARCH) {
+        if (direction === 'down') {
+            const fifaEls = getZoneElements(NAV_ZONES.FIFA);
+            if (fifaEls.length > 0) {
+                activeZone = NAV_ZONES.FIFA;
+            } else {
+                const catEls = getZoneElements(NAV_ZONES.CATEGORIES);
+                activeZone = catEls.length > 0 ? NAV_ZONES.CATEGORIES : NAV_ZONES.GRID;
+            }
+            zoneIndexes[activeZone] = 0;
+            syncFocus();
+        }
+    } else if (activeZone === NAV_ZONES.FIFA) {
+        if (direction === 'left' && idx > 0) {
+            zoneIndexes[activeZone] = idx - 1;
+            syncFocus();
+        } else if (direction === 'right' && idx < els.length - 1) {
+            zoneIndexes[activeZone] = idx + 1;
+            syncFocus();
+        } else if (direction === 'up') {
+            activeZone = NAV_ZONES.SEARCH;
+            zoneIndexes[activeZone] = 0;
+            syncFocus();
+        } else if (direction === 'down') {
+            const catEls = getZoneElements(NAV_ZONES.CATEGORIES);
+            activeZone = catEls.length > 0 ? NAV_ZONES.CATEGORIES : NAV_ZONES.GRID;
+            zoneIndexes[activeZone] = 0;
+            syncFocus();
+        }
+    } else if (activeZone === NAV_ZONES.CATEGORIES) {
+        if (direction === 'left' && idx > 0) {
+            zoneIndexes[activeZone] = idx - 1;
+            syncFocus();
+        } else if (direction === 'right' && idx < els.length - 1) {
+            zoneIndexes[activeZone] = idx + 1;
+            syncFocus();
+        } else if (direction === 'up') {
+            const fifaEls = getZoneElements(NAV_ZONES.FIFA);
+            if (fifaEls.length > 0) {
+                activeZone = NAV_ZONES.FIFA;
+                zoneIndexes[activeZone] = 0;
+            } else {
+                activeZone = NAV_ZONES.SEARCH;
+                zoneIndexes[activeZone] = 0;
+            }
+            syncFocus();
+        } else if (direction === 'down') {
+            activeZone = NAV_ZONES.GRID;
+            zoneIndexes[activeZone] = 0;
+            syncFocus();
+        }
+    } else if (activeZone === NAV_ZONES.GRID) {
+        // Dynamic Column count evaluation directly from grid dimensions
+        const firstCard = DOM.channelsGrid.querySelector('.channel-card');
+        let cols = 4; // safety default
+        if (DOM.channelsGrid && firstCard) {
+            cols = Math.floor(DOM.channelsGrid.clientWidth / firstCard.offsetWidth) || 4;
+        }
+
+        if (direction === 'left' && idx > 0) {
+            zoneIndexes[activeZone] = idx - 1;
+            syncFocus();
+        } else if (direction === 'right' && idx < els.length - 1) {
+            zoneIndexes[activeZone] = idx + 1;
+            syncFocus();
+        } else if (direction === 'up') {
+            if (idx - cols >= 0) {
+                zoneIndexes[activeZone] = idx - cols;
+                syncFocus();
+            } else {
+                // Return to category list above
+                activeZone = NAV_ZONES.CATEGORIES;
+                zoneIndexes[activeZone] = 0;
+                syncFocus();
+            }
+        } else if (direction === 'down') {
+            if (idx + cols < els.length) {
+                zoneIndexes[activeZone] = idx + cols;
+                syncFocus();
+            }
+        }
+    }
+}
+
+function syncFocus() {
+    let els = getZoneElements(activeZone);
+    if (els.length === 0) {
+        if (activeZone === NAV_ZONES.FIFA) {
+            activeZone = NAV_ZONES.CATEGORIES;
+            els = getZoneElements(activeZone);
+        } else if (activeZone === NAV_ZONES.CATEGORIES) {
+            activeZone = NAV_ZONES.GRID;
+            els = getZoneElements(activeZone);
+        } else {
+            activeZone = NAV_ZONES.SEARCH;
+            els = getZoneElements(activeZone);
+        }
+    }
+
+    let idx = zoneIndexes[activeZone];
+    if (idx < 0) idx = 0;
+    if (idx >= els.length) idx = els.length - 1;
+    zoneIndexes[activeZone] = idx;
+
+    const target = els[idx];
+    if (target) {
+        target.focus();
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        lastFocusedElement = target;
+    }
+}
+
+// ============================================================
+// TV HUD (Netflix / YouTube TV / TiviMate Control Overlays)
+// ============================================================
+function hidePlayerControls() {
+    if (DOM.playerTopBar) DOM.playerTopBar.classList.add('controls-hidden');
+    if (DOM.playerBottomBar) DOM.playerBottomBar.classList.add('controls-hidden');
+    controlsVisible = false;
+
+    // Unfocus active player elements to hide focus outline when HUD hides
+    if (DOM.playerPage.classList.contains('active')) {
+        document.activeElement.blur();
+    }
+}
+
+function showPlayerControls() {
+    if (DOM.playerTopBar) DOM.playerTopBar.classList.remove('controls-hidden');
+    if (DOM.playerBottomBar) DOM.playerBottomBar.classList.remove('controls-hidden');
+    controlsVisible = true;
+
+    resetControlsTimer();
+
+    // Re-focus the active player element when HUD reappears
+    if (DOM.playerPage.classList.contains('active')) {
+        restorePlayerFocus();
+    }
+}
+
+function resetControlsTimer() {
+    if (controlsTimeout) clearTimeout(controlsTimeout);
+    controlsTimeout = setTimeout(hidePlayerControls, 4000);
+}
+
+function restorePlayerFocus() {
+    const els = getPlayerFocusables();
+    if (els.length > 0) {
+        let idx = zoneIndexes[NAV_ZONES.PLAYER] || 0;
+        if (idx >= els.length) idx = 0;
+        els[idx].focus();
+    }
+}
+
+// ============================================================
+// DPAD REMOTE KEYBOARD EVENT LISTENER
+// ============================================================
+function setupDpadNavigation() {
+    document.addEventListener('keydown', function(e) {
+        const key = e.key;
+        const keyCode = e.keyCode || e.which;
+        const code = e.code;
+
+        // Remote action checks
+        const isLeft = (key === 'ArrowLeft' || keyCode === 37 || code === 'ArrowLeft');
+        const isRight = (key === 'ArrowRight' || keyCode === 39 || code === 'ArrowRight');
+        const isUp = (key === 'ArrowUp' || keyCode === 38 || code === 'ArrowUp');
+        const isDown = (key === 'ArrowDown' || keyCode === 40 || code === 'ArrowDown');
+        const isEnter = (
+            key === 'Enter' ||
+            key === 'NumpadEnter' ||
+            key === 'Accept' ||
+            key === 'Execute' ||
+            keyCode === 13 ||
+            keyCode === 23 ||
+            keyCode === 66 ||
+            code === 'Enter' ||
+            code === 'NumpadEnter'
+        );
+        const isBack = (
+            key === 'Backspace' ||
+            key === 'Escape' ||
+            key === 'BrowserBack' ||
+            keyCode === 8 ||
+            keyCode === 27 ||
+            keyCode === 461 ||
+            keyCode === 10009 ||
+            code === 'Backspace'
+        );
+
+        if (isLeft || isRight || isUp || isDown || isEnter || isBack) {
+            // High-precision remote debounce guard
+            const now = Date.now();
+            if (now - lastKeyPressTime < KEY_THROTTLE_MS) {
+                e.preventDefault();
+                return;
+            }
+            lastKeyPressTime = now;
+        }
+
+        // TiviMate HUD First-Key Behavior: Show HUD menu first before handling navigation
+        if (DOM.playerPage.classList.contains('active')) {
+            if (!controlsVisible && (isLeft || isRight || isUp || isDown || isEnter)) {
+                e.preventDefault();
+                showPlayerControls();
+                return;
+            } else if (controlsVisible) {
+                resetControlsTimer();
+            }
+        }
+
+        if (isLeft) {
+            e.preventDefault();
+            moveFocus('left');
+            return;
+        }
+        if (isRight) {
+            e.preventDefault();
+            moveFocus('right');
+            return;
+        }
+        if (isUp) {
+            e.preventDefault();
+            moveFocus('up');
+            return;
+        }
+        if (isDown) {
+            e.preventDefault();
+            moveFocus('down');
+            return;
+        }
+
+        if (isEnter) {
+            e.preventDefault();
+            const active = document.activeElement;
+            if (active) {
+                active.classList.add('clicked');
+                setTimeout(function() { active.classList.remove('clicked'); }, 200);
+
+                if (typeof active.click === 'function') {
+                    active.click();
+                } else {
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true,
+                        cancelable: true,
+                        view: window
+                    });
+                    active.dispatchEvent(clickEvent);
+                }
+            }
+            return;
+        }
+
+        if (isBack) {
+            if (DOM.playerPage.classList.contains('active')) {
+                e.preventDefault();
+                goBack();
+            }
+            return;
+        }
+
+        // Standard Play / Pause Remote Trigger integration
+        if (key === 'MediaPlayPause' && DOM.playerPage.classList.contains('active')) {
+            e.preventDefault();
+            if (DOM.videoElement.paused) {
+                DOM.videoElement.play();
+            } else {
+                DOM.videoElement.pause();
+            }
+            return;
+        }
+    }, true);
+}
+
+// ============================================================
+// BACK BUTTON AND BROWSER NAVIGATION ENGINE
+// ============================================================
+function setupBackButton() {
+    window.addEventListener('popstate', function(e) {
+        if (DOM.playerPage.classList.contains('active')) {
+            e.preventDefault();
+            goBack();
+        }
+    });
+}
+
+// ============================================================
+// PLAYER CONTROLLER SYSTEM
+// ============================================================
+function openPlayer(index) {
+    currentChannelIndex = index;
+    currentServerIndex = 0;
+    playChannel(index, 0);
+
+    DOM.playerPage.classList.add('active');
+    DOM.homePage.style.display = 'none';
+    DOM.header.style.display = 'none';
+
+    try {
+        history.pushState({ page: 'player' }, '');
+    } catch (e) {
+        console.log('History push failed:', e);
+    }
+
+    requestFullscreen();
+
+    // Reset controls timeout and display immediately
+    showPlayerControls();
+
+    setTimeout(function() {
+        if (DOM.backBtn) {
+            DOM.backBtn.focus();
+            lastFocusedElement = DOM.backBtn;
+        }
+    }, 300);
+}
+
+function goBack() {
+    if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+    }
+    DOM.videoElement.pause();
+    DOM.videoElement.src = "";
+    DOM.embedElement.src = "";
+    DOM.embedElement.style.display = 'none';
+
+    DOM.playerPage.classList.remove('active');
+    DOM.homePage.style.display = 'flex';
+    DOM.header.style.display = 'flex';
+
+    if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement) {
+        try {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            }
+        } catch (e) {
+            console.log('Exit fullscreen failed:', e);
+        }
+    }
+
+    try {
+        if (history.state && history.state.page === 'player') {
+            history.back();
+        }
+    } catch (e) {
+        console.log('History back failed:', e);
+    }
+
+    setTimeout(function() {
+        refreshTabIndex();
+
+        let targetCard = null;
+        if (lastFocusedElement && document.contains(lastFocusedElement) &&
+            (lastFocusedElement.classList.contains('channel-card') || lastFocusedElement.classList.contains('fifa-card'))) {
+            targetCard = lastFocusedElement;
+        } else {
+            const visibleCards = Array.from(document.querySelectorAll('.channel-card, .fifa-card'))
+                .filter(function(c) { return c.style.display !== 'none'; });
+            if (visibleCards.length > 0) {
+                targetCard = visibleCards[0];
+            }
+        }
+
+        if (targetCard) {
+            targetCard.focus();
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        } else {
+            if (DOM.searchInput) DOM.searchInput.focus();
+        }
+    }, 150);
+}
+
+function requestFullscreen() {
+    const docEl = document.documentElement;
+    try {
+        if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(function(err) { console.log('Fullscreen blocked:', err); });
+        } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+        } else if (docEl.mozRequestFullScreen) {
+            docEl.mozRequestFullScreen();
+        } else if (docEl.msRequestFullscreen) {
+            docEl.msRequestFullscreen();
+        }
+    } catch (e) {
+        console.log('Fullscreen request failed:', e);
+    }
+}
+
+// ============================================================
+// PLAYLIST AND NETWORK INTERFACE (Preserved completely)
+// ============================================================
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 3500 } = options; 
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal  
+        });
+        clearTimeout(id);
+        return response;
+    } catch (err) {
+        clearTimeout(id);
+        throw err;
+    }
+}
+
+async function fetchPlaylist(url) {
+    try {
+        const response = await fetchWithTimeout(url, { timeout: 3500 });
+        if (response.ok) {
+            const text = await response.text();
+            return parseM3U(text);
+        }
+    } catch (e) {
+        console.warn(`Direct loading failed for: ${url}. Retrying with proxy...`);
+    }
+
+    try {
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+        const response = await fetchWithTimeout(proxyUrl, { timeout: 4000 });
+        if (response.ok) {
+            const text = await response.text();
+            return parseM3U(text);
+        }
+    } catch (fallbackError) {
+        console.error(`Both direct and proxy failed for: ${url}`);
+    }
+    return [];
+}
+
+async function loadM3U() {
+    const playlistUrls = [
+        'https://raw.githubusercontent.com/olkite/olkitetv/refs/heads/main/olkitetv.m3u?fbclid=IwY2xjawSR33FleHRuA2FlbQIxMQBzcnRjBmFwcF9pZAwzNTA2ODU1MzE3MjgAAR5DV-qYzb_Y57GxBAACWGB9-uGIbbHbylar3SKsj5SmIAAO4rR1GYpOAmAFjA_aem_YQqvcOAJg8B-rjCfzPe_Yw',
+        'https://raw.githubusercontent.com/FunctionError/PiratesTv/main/combined_playlist.m3u',
+        'https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/main/playlist.m3u'
+    ];
+
+    const promises = playlistUrls.map(url => fetchPlaylist(url));
+    const results = await Promise.all(promises);
+
+    let allChannels = [];
+    let successCount = 0;
+
+    results.forEach(channels => {
+        if (channels.length > 0) {
+            allChannels = allChannels.concat(channels);
+            successCount++;
+        }
+    });
+
+    if (successCount > 0) {
+        channelsList = mergeDuplicateChannels(allChannels);
+        const result = extractFifaChannels(channelsList);
+        const fifaChannels = result.fifaChannels;
+        const otherChannels = result.otherChannels;
+
+        renderFifaChannels(fifaChannels);
+        renderChannels(otherChannels);
+
+        setTimeout(function() {
+            refreshTabIndex();
+            const visibleCards = Array.from(document.querySelectorAll('.channel-card, .fifa-card'))
+                .filter(function(c) { return c.style.display !== 'none'; });
+            if (visibleCards.length > 0) {
+                visibleCards[0].focus();
+                visibleCards[0].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                lastFocusedElement = visibleCards[0];
+            }
+        }, 100);
+    } else {
+        showErrorUI();
+    }
+}
+
+// ============================================================
+// PLAYLIST PARSER & CATEGORY MAPPERS
+// ============================================================
+function extractFifaChannels(channels) {
+    const fifaKeywords = ['fifa', 'world cup', 'caze tv', 'cazé tv', 'fifa tv 1', 'fifa tv 2', 'fifa tv 3', 'fifa tv 4', 'fifa tv 5', 'fifa tv 6', 'fifa tv 7', 'fifa tv 8', 'fifa tv 9', 'fifa tv 10'];
+    const fifaChannels = [];
+    const otherChannels = [];
+
+    channels.forEach(function(channel, index) {
+        const lowerName = channel.name.toLowerCase();
+        let isFifa = false;
+        for (let j = 0; j < fifaKeywords.length; j++) {
+            if (lowerName.includes(fifaKeywords[j])) {
+                isFifa = true;
+                break;
+            }
+        }
+        if (isFifa) {
+            fifaChannels.push(Object.assign({}, channel, { originalIndex: index }));
+        } else {
+            otherChannels.push(channel);
+        }
+    });
+
+    return { fifaChannels: fifaChannels, otherChannels: otherChannels };
+}
+
+function renderFifaChannels(fifaChannels) {
+    if (!DOM.fifaGrid || !DOM.fifaSection) return;
+
+    if (fifaChannels.length === 0) {
+        DOM.fifaSection.style.display = 'none';
+        return;
+    }
+
+    DOM.fifaSection.style.display = 'block';
+    let htmlContent = '';
+
+    fifaChannels.forEach(function(channel) {
+        const originalIndex = channel.originalIndex;
+        const logoSrc = channel.logo ? channel.logo : 'https://placehold.co/300x200/0f3460/ffd700?text=' + encodeURIComponent(channel.name);
+        const serverCount = channel.urls ? channel.urls.length : 1;
+        const serverBadge = serverCount > 1 ? `<div class="server-badge">${serverCount}</div>` : '';
+
+        htmlContent += `
+            <div class="fifa-card" tabindex="0" onclick="openPlayer(${originalIndex})" data-name="${channel.name.toLowerCase()}">
+                <div class="logo-box">
+                    <div class="fifa-badge">FIFA</div>
+                    <img src="${logoSrc}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/300x200/0f3460/ffd700?text=${encodeURIComponent(channel.name)}'">
+                    ${serverBadge}
+                </div>
+                <div class="channel-name">${channel.name}</div>
+            </div>
+        `;
+    });
+
+    DOM.fifaGrid.innerHTML = htmlContent;
+}
+
+function mergeDuplicateChannels(channels) {
+    const merged = {};
+
+    channels.forEach(function(channel) {
+        const key = channel.name.toLowerCase().trim();
+
+        if (!merged[key]) {
+            merged[key] = {
+                name: channel.name,
+                logo: channel.logo,
+                category: channel.category,
+                urls: [channel.url]
+            };
+        } else {
+            if (merged[key].urls.indexOf(channel.url) === -1) {
+                merged[key].urls.push(channel.url);
+            }
+            if (!merged[key].logo && channel.logo) {
+                merged[key].logo = channel.logo;
+            }
+        }
+    });
+
+    return Object.values(merged);
+}
+
+function showErrorUI() {
+    if (DOM.channelsGrid) {
+        DOM.channelsGrid.innerHTML =
+            '<div style="grid-column: 1/-1; padding: 24px; text-align: center; color: var(--accent-red);">' +
+                '<p style="font-weight: bold; margin-bottom: 8px;">প্লেলিস্ট লিঙ্কটি লোড করা সম্ভব হয়নি।</p>' +
+                '<p style="font-size: 0.85rem; color: var(--text-grey); line-height: 1.5;">' +
+                    'আপনার নেটওয়ার্ক কানেকশন চেক করুন অথবা লিঙ্কটি ব্রাউজারে সক্রিয় আছে কিনা তা নিশ্চিত করুন।' +
+                '</p>' +
+            '</div>';
+    }
+}
+
+function getCategory(name) {
+    const lowerName = name.toLowerCase();
+
+    if (lowerName.includes('quran') || lowerName.includes('makkah') || lowerName.includes('madina') || lowerName.includes('islam') || lowerName.includes('azan') || lowerName.includes('madani') || lowerName.includes('deen') || lowerName.includes('eman')) {
+        return 'Islamic';
+    }
+    if (lowerName.includes('sports') || lowerName.includes('cric') || lowerName.includes('tsports') || lowerName.includes('willow') || lowerName.includes('golf') || lowerName.includes('espn') || lowerName.includes('nfl') || lowerName.includes('tsn') || lowerName.includes('real madrid') || lowerName.includes('fighter') || lowerName.includes('ufc') || lowerName.includes('ten')) {
+        return 'Sports';
+    }
+    if (lowerName.includes('cartoon') || lowerName.includes('disney') || lowerName.includes('nick') || lowerName.includes('kids') || lowerName.includes('gopal') || lowerName.includes('motu') || lowerName.includes('oggy') || lowerName.includes('batul') || lowerName.includes('tiny') || lowerName.includes('pang') || lowerName.includes('gully') || lowerName.includes('gumball') || lowerName.includes('duronto') || lowerName.includes('anime')) {
+        return 'Cartoon';
+    }
+    if (lowerName.includes('news') || lowerName.includes('somoy') || lowerName.includes('jamuna') || lowerName.includes('ekattor') || lowerName.includes('independent') || lowerName.includes('dbc') || lowerName.includes('khabar') || lowerName.includes('sky') || lowerName.includes('abc') || lowerName.includes('ndtv') || lowerName.includes('wion') || lowerName.includes('jazeera') || lowerName.includes('cnn') || lowerName.includes('euronews') || lowerName.includes('dw') || lowerName.includes('trt') || lowerName.includes('press') || lowerName.includes('national') || lowerName.includes('bloomberg') || lowerName.includes('oan') || lowerName.includes('cgtn')) {
+        return 'News';
+    }
+    if (lowerName.includes('kolkata') || lowerName.includes('abp ananda') || lowerName.includes('news18 bangla') || lowerName.includes('sangeet bangla') || lowerName.includes('zee bangla') || lowerName.includes('colors bangla') || lowerName.includes('star jalsha') || lowerName.includes('jalsha movies') || lowerName.includes('sony aath') || lowerName.includes('rongeen') || lowerName.includes('zee 24 ghanta') || lowerName.includes('republic bangla')) {
+        return 'Kolkata';
+    }
+    if (lowerName.includes('dd ') || lowerName.includes('aaj tak') || lowerName.includes('india tv') || lowerName.includes('republic bharat') || lowerName.includes('star gold') || lowerName.includes('sony max') || lowerName.includes('zee tv') || lowerName.includes('hindi') || lowerName.includes('dangal') || lowerName.includes('shemaroo')) {
+        return 'India';
+    }
+    if (lowerName.includes('tv') || lowerName.includes('banglavision') || lowerName.includes('ntv') || lowerName.includes('deepto') || lowerName.includes('rtv') || lowerName.includes('gazi') || lowerName.includes('channel i') || lowerName.includes('asian') || lowerName.includes('mohona') || lowerName.includes('maasrangatv') || lowerName.includes('ekhontv') || lowerName.includes('deshtv') || lowerName.includes('bijoytv') || lowerName.includes('mytv') || lowerName.includes('globaltv') || lowerName.includes('btv') || lowerName.includes('nagorik') || lowerName.includes('nexustv')) {
+        return 'Bangladesh';
+    }
+    return 'Others';
+}
+
+function parseM3U(text) {
+    const lines = text.split(/\r?\n/);
+    const list = [];
+    let currentChannel = {};
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        if (line.startsWith('#EXTINF:')) {
+            const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+            const nameIndex = line.lastIndexOf(',');
+            const name = nameIndex !== -1 ? line.substring(nameIndex + 1).trim() : "Unknown Stream";
+
+            currentChannel = {
+                name: name,
+                logo: (logoMatch && logoMatch[1]) ? logoMatch[1] : '',
+                category: getCategory(name)
+            };
+        } else if (line.startsWith('http') || line.startsWith('rtmp') || line.startsWith('rtsp')) {
+            currentChannel.url = line;
+            if (currentChannel.name) {
+                list.push(Object.assign({}, currentChannel));
+            }
+            currentChannel = {};
+        }
+    }
+    return list;
+}
+
+function renderChannels(channels) {
+    if (!DOM.channelsGrid) return;
+    
+    let htmlContent = '';
+
+    channels.forEach(function(channel, index) {
+        const logoSrc = channel.logo ? channel.logo : 'https://placehold.co/300x400/006a4e/ffffff?text=' + encodeURIComponent(channel.name);
+        const serverCount = channel.urls ? channel.urls.length : 1;
+        const serverBadge = serverCount > 1 ? `<div class="server-badge">${serverCount} সার্ভার</div>` : '';
+
+        htmlContent += `
+            <div class="channel-card" id="channel-${index}" tabindex="0" data-category="${channel.category}" data-name="${channel.name.toLowerCase()}" onclick="openPlayer(${index})">
+                <div class="logo-box">
+                    <img src="${logoSrc}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/300x400/006a4e/ffffff?text=${encodeURIComponent(channel.name)}'">
+                    ${serverBadge}
+                </div>
+                <div class="channel-name">${channel.name}</div>
+            </div>
+        `;
+    });
+
+    DOM.channelsGrid.innerHTML = htmlContent;
+
+    applyFilters();
+    refreshTabIndex();
+}
+
+function selectCategory(category, element) {
+    activeCategory = category;
+    const pills = document.querySelectorAll('.category-pill');
+    pills.forEach(function(pill) { pill.classList.remove('active'); });
+    element.classList.add('active');
+    applyFilters();
+
+    setTimeout(function() {
+        const visibleCards = Array.from(document.querySelectorAll('.channel-card, .fifa-card'))
+            .filter(function(c) { return c.style.display !== 'none'; });
+        if (visibleCards.length > 0) {
+            visibleCards[0].focus();
+            visibleCards[0].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        }
+    }, 100);
+}
+
+function applyFilters() {
+    if (!DOM.searchInput) return;
+    const query = DOM.searchInput.value.toLowerCase();
+    const cards = document.querySelectorAll('.channel-card');
+    const fifaCards = document.querySelectorAll('.fifa-card');
+
+    fifaCards.forEach(function(card) {
+        const cardName = card.dataset.name;
+        if (cardName && cardName.includes(query)) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    cards.forEach(function(card) {
+        const cardCategory = card.dataset.category;
+        const cardName = card.dataset.name;
+
+        const matchCategory = (activeCategory === 'All' || cardCategory === activeCategory);
+        const matchSearch = cardName && cardName.includes(query);
+
+        if (matchCategory && matchSearch) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function getEmbedUrl(url) {
+    if (url.includes('youtube.com/watch?v=')) {
+        const videoId = url.split('v=')[1].split('&')[0];
+        return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=0';
+    }
+    if (url.includes('youtu.be/')) {
+        const videoId = url.split('youtu.be/')[1].split('?')[0];
+        return 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&mute=0';
+    }
+    if (url.includes('youtube.com/embed/')) {
+        return url + (url.includes('?') ? '&' : '?') + 'autoplay=1&mute=0';
+    }
+    if (url.includes('twitch.tv/')) {
+        const parts = url.split('twitch.tv/');
+        const channel = parts[1].split('/')[0].split('?')[0];
+        return 'https://player.twitch.tv/?channel=' + channel + '&parent=' + (window.location.hostname || 'localhost') + '&autoplay=true&muted=false';
+    }
+    return null;
+}
+
+// ============================================================
+// HLS/NATIVE PLAYBACK PIPELINES
+// ============================================================
+function playChannel(index, serverIdx) {
+    const channel = channelsList[index];
+    if (!channel || !channel.urls || channel.urls.length === 0) return;
+
+    currentChannelIndex = index;
+    currentServerIndex = serverIdx;
+    const url = channel.urls[serverIdx];
+
+    if (DOM.currentTitle) {
+        DOM.currentTitle.innerText = channel.name + (channel.urls.length > 1 ? ' (সার্ভার ' + (serverIdx + 1) + '/' + channel.urls.length + ')' : '');
+    }
+
+    renderServerButtons(channel.urls, serverIdx);
+
+    if (hlsInstance) {
+        hlsInstance.destroy();
+        hlsInstance = null;
+    }
+    DOM.videoElement.pause();
+    DOM.videoElement.src = "";
+    DOM.embedElement.src = "";
+
+    DOM.videoElement.muted = false;
+
+    const embedUrl = getEmbedUrl(url);
+
+    if (embedUrl) {
+        DOM.videoElement.style.display = 'none';
+        DOM.embedElement.style.display = 'block';
+        DOM.embedElement.src = embedUrl;
+        if (DOM.pipBtn) DOM.pipBtn.style.display = 'none';
+    } else {
+        DOM.embedElement.style.display = 'none';
+        DOM.videoElement.style.display = 'block';
+        if (DOM.pipBtn) DOM.pipBtn.style.display = 'flex';
+
+        if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+            hlsInstance = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true
+            });
+            hlsInstance.loadSource(url);
+            hlsInstance.attachMedia(DOM.videoElement);
+
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                DOM.videoElement.play().catch(function(err) {
+                    console.warn("Unmuted autoplay blocked. Retrying muted...", err);
+                    DOM.videoElement.muted = true;
+                    DOM.videoElement.play().catch(function(muteErr) {
+                        console.error("Autoplay blocked:", muteErr);
+                    });
+                });
+            });
+
+            hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            console.warn('Network error, trying next server...');
+                            tryNextServer();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hlsInstance.recoverMediaError();
+                            break;
+                        default:
+                            console.warn('Fatal error, trying next server...');
+                            tryNextServer();
+                            break;
+                    }
+                }
+            });
+        } else if (DOM.videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+            DOM.videoElement.src = url;
+            DOM.videoElement.addEventListener('loadedmetadata', function onLoaded() {
+                DOM.videoElement.removeEventListener('loadedmetadata', onLoaded);
+                DOM.videoElement.play().catch(function(err) {
+                    console.warn("Unmuted native autoplay blocked. Retrying muted...", err);
+                    DOM.videoElement.muted = true;
+                    DOM.videoElement.play().catch(function(muteErr) {
+                        console.error(muteErr);
+                    });
+                });
+            });
+
+            DOM.videoElement.addEventListener('error', function onError() {
+                DOM.videoElement.removeEventListener('error', onError);
+                console.warn('Native video error, trying next server...');
+                tryNextServer();
+            });
+        }
+    }
+}
+
+function tryNextServer() {
+    const channel = channelsList[currentChannelIndex];
+    if (!channel || !channel.urls) return;
+
+    const nextIndex = currentServerIndex + 1;
+    if (nextIndex < channel.urls.length) {
+        console.log('Switching to Server ' + (nextIndex + 1) + '...');
+        playChannel(currentChannelIndex, nextIndex);
+    } else {
+        console.error('All servers failed for this channel.');
+        if (DOM.currentTitle) {
+            DOM.currentTitle.innerText = channel.name + ' - সব সার্ভার ব্যর্থ';
+        }
+    }
+}
+
+function renderServerButtons(urls, activeIndex) {
+    if (!DOM.serverButtons) return;
+
+    if (!urls || urls.length <= 1) {
+        DOM.serverButtons.innerHTML = '';
+        DOM.serverButtons.style.display = 'none';
+        return;
+    }
+
+    DOM.serverButtons.style.display = 'flex';
+    let html = '';
+    urls.forEach(function(url, idx) {
+        const isActive = idx === activeIndex;
+        html += '<button class="server-btn ' + (isActive ? 'active' : '') + '" tabindex="0" onclick="playChannel(' + currentChannelIndex + ', ' + idx + ')" title="Server ' + (idx + 1) + '">সার্ভার ' + (idx + 1) + '</button>';
+    });
+    DOM.serverButtons.innerHTML = html;
+    refreshTabIndex();
+}
+
+function selectServer(serverIdx) {
+    playChannel(currentChannelIndex, serverIdx);
+}
+
+async function triggerPip() {
+    try {
+        if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+        } else if (document.pictureInPictureEnabled && DOM.videoElement.style.display !== 'none') {
+            await DOM.videoElement.requestPictureInPicture();
+        } else {
+            alert("আপনার ব্রাউজার বা এই চ্যানেলটির জন্য পপআপ মোড সমর্থিত নয়।");
+        }
+    } catch (error) {
+        console.error("PiP error: ", error);
+    }
+}
+</script>
+</body>
+</html>
